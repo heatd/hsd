@@ -101,4 +101,7 @@ void unixinit(unsigned int magic, unsigned int addr)
     earlymminit();
     trapinit();
     parsemmap();
+
+    for (;;)
+        __asm__("hlt");
 }

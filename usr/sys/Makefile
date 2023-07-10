@@ -52,7 +52,7 @@ CPPFLAGS:=$(CPPFLAGS) -D__KERNEL__  -Iinclude
 LDFLAGS:=$(LDFLAGS) -fkeep-inline-functions -Wl,--build-id=none -nostdlib
 
 OBJS:=stand/boot.o stand/init.o stand/mem.o sys/pagealloc.o stand/trap.o stand/locore.o stand/gdt.o stand/serial.o\
-      stand/pic.o sys/printf.o sys/puts.o sys/str.o sys/malloc.o stand/panic.o
+      stand/pic.o sys/printf.o sys/puts.o sys/str.o sys/malloc.o stand/panic.o stand/pit.o
 
 %.o: %.c $(GENERATED_HEADERS)
 	@$(CC) -c $< -o $@ -std=gnu89 $(CFLAGS) $(CPPFLAGS) $(C_ONLY_CFLAGS) -Wno-error=deprecated-declarations

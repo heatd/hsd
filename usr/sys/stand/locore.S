@@ -83,7 +83,6 @@ Xisr\num:
 .global Xirq\irq_num
 .type Xirq\irq_num,@ function
 Xirq\irq_num:
-    cli
     sub $4, %esp
     push $(\irq_num + EXCEPTION_VECTORS_END)
     jmp Xinterrupt_common
@@ -97,7 +96,6 @@ Xirq\irq_num:
 .macro ISR_ERRCODE num
 .global Xisr\num
 Xisr\num:
-    cli
     push $\num # Push the interrupt number to the intctx
     jmp Xinterrupt_common # Go to the handler
 
@@ -156,9 +154,9 @@ Xinterrupt_common:
     push %esp
     mov %esp, %ebp
 
-    /*call x86_dispatch_interrupt
+    call trapdisp
 
-    mov %eax, %rsp*/
+    mov %eax, %esp
 
     jmp Xiret
 

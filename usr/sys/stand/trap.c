@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-ONLY */
 #include <stand/seg.h>
+#include <out.h>
 
 void loadidt(unsigned short limit, void *);
 
@@ -9,8 +10,8 @@ struct idte
     unsigned short idt_segsel;
     unsigned char idt_mbz;
     unsigned char idt_flags;
-    unsigned char idt_offhi;
-};
+    unsigned short idt_offhi;
+} __attribute__((packed));
 
 /* 0x8e = P | 0 D 1 1 0
  * P = segment present,
@@ -66,42 +67,15 @@ extern void Xisr29(void);
 extern void Xisr30(void);
 extern void Xisr31(void);
 
+extern void (*x86_isr_table[])(void);
 
 static
 void initidt(void)
 {
-    trapresv(0, Xisr0);
-    trapresv(1, Xisr1);
-    trapresv(2, Xisr2);
-    trapresv(3, Xisr3);
-    trapresv(4, Xisr4);
-    trapresv(5, Xisr5);
-    trapresv(6, Xisr6);
-    trapresv(7, Xisr7);
-    trapresv(8, Xisr8);
-    trapresv(9, Xisr9);
-    trapresv(10, Xisr10);
-    trapresv(11, Xisr11);
-    trapresv(12, Xisr12);
-    trapresv(13, Xisr13);
-    trapresv(14, Xisr14);
-    trapresv(15, Xisr15);
-    trapresv(16, Xisr16);
-    trapresv(17, Xisr17);
-    trapresv(18, Xisr18);
-    trapresv(19, Xisr19);
-    trapresv(20, Xisr20);
-    trapresv(21, Xisr21);
-    trapresv(22, Xisr22);
-    trapresv(23, Xisr23);
-    trapresv(24, Xisr24);
-    trapresv(25, Xisr25);
-    trapresv(26, Xisr26);
-    trapresv(27, Xisr27);
-    trapresv(28, Xisr28);
-    trapresv(29, Xisr29);
-    trapresv(30, Xisr30);
-    trapresv(31, Xisr31);
+    int i;
+
+    for (i = 0; i < 256; i++)
+        trapresv(i, x86_isr_table[i]);
 
     /* Double fault handlers use a separate stack */
     /* TODO: Set this up better. */
@@ -110,9 +84,43 @@ void initidt(void)
 }
 
 void initgdt(void);
+void picinit(unsigned int irqoff);
+void pitinit(unsigned frequency);
 
 void trapinit(void)
 {
     initgdt();
     initidt();
+    picinit(32);
+    pitinit(100);
+}
+
+struct uregs
+{
+    unsigned ds;
+    unsigned ebp;
+    unsigned esi;
+    unsigned edi;
+    unsigned edx;
+    unsigned ecx;
+    unsigned ebx;
+    unsigned eax;
+    unsigned trapno, trap_errc;
+    unsigned eip;
+    unsigned cs;
+    unsigned eflags;
+    unsigned esp;
+    unsigned ss;
+};
+
+
+void eoi(unsigned irq);
+
+struct uregs *trapdisp(struct uregs *reg)
+{
+    if (reg->trapno < 32)
+        panic("exception"); /* XXX signals? */
+    if (reg->trapno >= 32)
+        eoi(reg->trapno - 32);
+    return reg;
 }
