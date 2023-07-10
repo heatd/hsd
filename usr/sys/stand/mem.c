@@ -48,3 +48,28 @@ void earlymminit(void)
         bootpgd.entry[PTE3G + 1 + i] = ((unsigned long) pt - KVBASE) | PG_P | PG_W;
     }
 }
+
+#define PTINDEX(vaddr, index) (((vaddr) >> (12 + 10 * (index))) & 0x3ff)
+#define PTEADDR(val) ((val) & -PAGESZ)
+
+struct page *virt_to_page(void *p)
+{
+    unsigned long vaddr = (unsigned long) p;
+    unsigned int pte;
+    struct pt *pgd = &bootpgd, *pt;
+
+    pte = pgd->entry[PTINDEX(vaddr, 1)];
+    if (!(pte & PG_P))
+        goto nomap;
+    
+    pt = (struct pt *) (KVBASE + PTEADDR(pte));
+    pte = pt->entry[PTINDEX(vaddr, 0)];
+
+    if (!(pte & PG_P))
+        goto nomap;
+    
+    return phys_to_page(PTEADDR(pte));
+
+nomap:
+    return 0;
+}

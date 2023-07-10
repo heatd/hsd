@@ -55,7 +55,8 @@ int growfl(struct freelist *flp, int order)
 
     if (!p)
         return 0;
-    
+    p->p.p_mdata.m_bsize = bsize;
+
     virt = page_to_virt(p);
 
     for (i = 0; i < nblocks; i++, virt += bsize)
@@ -111,11 +112,16 @@ void free(void *p)
         panic("free: bad pointer");
     
     bsize = page->p.p_mdata.m_bsize;
+
+    if (!bsize)
+        panic("free: given pointer is not part of the heap");
+
     if ((unsigned long) p & (bsize - 1))
         panic("free: bad pointer");
     
     order = mem_to_order(bsize);
     flp = &kmemfree[order];
+    flp->f_allocbytes -= bsize;
 
     *(void **) p = flp->chunk_head;
     flp->chunk_head = p;

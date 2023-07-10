@@ -11,11 +11,6 @@ void pageinit(unsigned long maxpfn)
     printf("pageinit: maxpfn %lx\n", maxpfn);
 }
 
-struct page *virt_to_page(void *p)
-{
-    return 0;
-}
-
 void pagenew(unsigned long start, unsigned long size)
 {
     unsigned long pgs = 0, i, addr;

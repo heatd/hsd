@@ -2,6 +2,7 @@
 #include <multiboot2.h>
 #include <page.h>
 #include <out.h>
+#include <alloc.h>
 
 void earlymminit(void);
 
