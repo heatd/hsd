@@ -108,4 +108,4 @@ fullbuild-plus-full-initrd: fullbuild
 	SYSTEM_ROOT=$(SYSROOT) scripts/geninitrd --compression-method none scripts/livecd-initrd.sh
 
 qemu: iso
-	qemu-system-i386 -s -cdrom hsd.iso -d int -no-shutdown -no-reboot
+	qemu-system-i386 -s -cdrom hsd.iso --enable-kvm -no-shutdown -no-reboot
