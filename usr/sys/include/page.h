@@ -40,4 +40,6 @@ int pagersv(unsigned long page);
 
 struct page *palloc(int flags);
 
+void pfree(struct page *p);
+
 #endif

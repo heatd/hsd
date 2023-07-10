@@ -51,3 +51,9 @@ struct page *palloc(int flags)
     p->p_refs = 1;
     return p;
 }
+
+void pfree(struct page *p)
+{
+    p->p_refs = 0;
+    list_add(&p->p.p_alloc, &pagelist);
+}
